@@ -17,7 +17,7 @@ services:
     - "DUCKDNS_TOKEN=${DUCKDNS_TOKEN}"
     - "CADDY_DOCKER_IP=${CADDY_DOCKER_IP}"
     network_mode: host
-    restart: 'yes'
+    restart: 'always'
     extra_hosts:
     - mosquitto:${DOCKERGW}
 
@@ -31,7 +31,7 @@ services:
     - "${PWD}/mosquitto/config:/mosquitto/config"
     environment:
     - "TZ=${TIMEZONE}"
-    restart: "yes"
+    restart: "always"
     networks:
       main:
         ipv4_address: 172.33.1.4
@@ -40,7 +40,7 @@ services:
     hostname: caddy
     image: ghcr.io/snakuzzo/caddy-cloudflare-duckdns:latest
     container_name: caddy
-    restart: "yes"
+    restart: "always"
     ports:
     - "${HOMEASSISTANT_EXTERNAL_PORT}:${HOMEASSISTANT_EXTERNAL_PORT}"
     environment:
