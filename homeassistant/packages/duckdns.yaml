@@ -1,0 +1,42 @@
+sensor:
+  - platform: rest
+    name: public_ip
+    resource: https://ipinfo.io/ip
+
+input_text:
+  duckdns_domain:
+    initial: !secret duckdns_domain
+  duckdns_token:
+    initial: !secret duckdns_token
+
+rest_command:
+  update_duckdns_ip:
+    url: "https://www.duckdns.org/update?domains={{ states('input_text.duckdns_domain') }}&token={{ states('input_text.duckdns_token') }}"
+    verify_ssl: true
+
+automation:
+  - id: update_duckdns_ip
+    alias: "Update DuckDNS IP"
+    trigger:
+      - id: ip
+        platform: state
+        entity_id: sensor.public_ip
+      - id: start
+        platform: homeassistant
+        event: start
+    action:
+      - choose:
+          - alias: ip
+            conditions:
+              - condition: trigger
+                id: ip
+              - condition: template
+                value_template: "{{ trigger.to_state.state not in ['unknown','unavailable','none'] }}"
+            sequence:
+              - service: rest_command.update_duckdns_ip
+          - alias: start
+            conditions:
+              - condition: template
+                value_template: "{{ states('sensor.public_ip') not in ['unknown','unavailable','none'] }}"
+            sequence:
+              - service: rest_command.update_duckdns_ip

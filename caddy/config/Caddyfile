@@ -1,0 +1,25 @@
+#  When your config is ok comment block below to disable use of AMCE staging server
+{
+    acme_ca https://acme-staging-v02.api.letsencrypt.org/directory 
+}
+
+###############
+
+(https_header) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubdomains"
+		X-XSS-Protection "1; mode=block"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "same-origin"
+	}
+}
+
+{$HOMEASSISTANT_EXTERNAL_URL} {
+	import https_header
+	reverse_proxy {$HOMEASSISTANT_INTERNAL_URL}
+    # DUCKDNS
+	tls {$EMAIL_ADDRESS} {
+		dns duckdns {$DUCKDNS_TOKEN}
+	}
+}

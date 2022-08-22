@@ -1,0 +1,20 @@
+homeassistant:
+  external_url: !secret external_url
+  internal_url: !secret internal_url 
+  # Customization file
+  customize: !include customize.yaml
+  packages: !include_dir_named packages
+
+default_config:
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - !secret caddy_docker_ip
+
+tts:
+  - platform: google_translate
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml

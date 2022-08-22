@@ -1,0 +1,69 @@
+version: '3.9'
+
+services:
+
+  homeassistant:
+    hostname: homeassistant
+    container_name: homeassistant
+    image: ghcr.io/home-assistant/home-assistant:stable
+    privileged: true
+    volumes:
+    - "${PWD}/homeassistant:/config"
+    environment:
+    - "TZ=${TIMEZONE}"
+    - "HOMEASSISTANT_EXTERNAL_URL=${HOMEASSISTANT_EXTERNAL_URL}"
+    - "HOMEASSISTANT_INTERNAL_URL=${HOMEASSISTANT_INTERNAL_URL}"
+    - "DUCKDNS_DOMAIN=${DUCKDNS_DOMAIN}"
+    - "DUCKDNS_TOKEN=${DUCKDNS_TOKEN}"
+    - "CADDY_DOCKER_IP=${CADDY_DOCKER_IP}"
+    network_mode: host
+    restart: 'yes'
+    extra_hosts:
+    - mosquitto:${DOCKERGW}
+
+  mosquitto:
+    hostname: mosquitto
+    container_name: mosquitto
+    image: eclipse-mosquitto:latest
+    ports:
+    - ${MOSQUITTO_PORT}:${MOSQUITTO_PORT}
+    volumes:
+    - "${PWD}/mosquitto/config:/mosquitto/config"
+    environment:
+    - "TZ=${TIMEZONE}"
+    restart: "yes"
+    networks:
+      main:
+        ipv4_address: 172.33.1.4
+
+  caddy:
+    hostname: caddy
+    image: ghcr.io/snakuzzo/caddy-cloudflare-duckdns:latest
+    container_name: caddy
+    restart: "yes"
+    ports:
+    - "${HOMEASSISTANT_EXTERNAL_PORT}:${HOMEASSISTANT_EXTERNAL_PORT}"
+    environment:
+    - "TZ=${TIMEZONE}"
+    - "EMAIL_ADDRESS=${EMAIL_ADDRESS}"
+    - "DUCKDNS_TOKEN=${DUCKDNS_TOKEN}"
+    - "HOMEASSISTANT_INTERNAL_URL=${HOMEASSISTANT_INTERNAL_URL}"
+    - "HOMEASSISTANT_EXTERNAL_URL=${HOMEASSISTANT_EXTERNAL_URL}"
+    volumes:
+    - "${PWD}/caddy/config/Caddyfile:/etc/caddy/Caddyfile"
+    - "${PWD}/caddy/data:/data"
+    extra_hosts:
+    - "host:${HOST}"
+    networks:
+      main:
+        ipv4_address: 172.33.1.3
+
+networks:
+  main:
+    name: domotica
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.33.0.0/16"
+          ip_range: "172.33.5.1/24"
+          gateway: "172.33.5.254"
