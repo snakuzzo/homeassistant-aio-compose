@@ -22,7 +22,7 @@ ip_bans.yaml
 phue.conf
 #plex.conf
 pyozw.sqlite
-secrets.yaml
+#secrets.yaml
 tradfri.conf
 
 # Temporary files
