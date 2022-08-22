@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "**/homeassistant/*.yaml": "home-assistant"
+    },
+    "vscode-home-assistant.hostUrl": "http://<ip_lan>:8123",
+    "vscode-home-assistant.longLivedAccessToken": "<homeassistant_token>",
+    "files.exclude": {
+        "**/homeassistant/*db*": true,
+        "**/homeassistant/*log*": true,
+    },
+}
